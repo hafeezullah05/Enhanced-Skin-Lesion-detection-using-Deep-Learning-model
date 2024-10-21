@@ -7,8 +7,8 @@ class ResNetModel(nn.Module):
     def __init__(self, num_metadata_features):
         super(ResNetModel, self).__init__()
         
-        # Load a pre-trained ResNet-18 model
-        self.resnet = models.resnet18(pretrained=True)
+        # Load a pre-trained ResNet-50 model
+        self.resnet = models.resnet50(pretrained=True)
         
         # Modify the fully connected layer to accommodate the output of ResNet
         in_features = self.resnet.fc.in_features
