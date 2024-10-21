@@ -69,6 +69,9 @@ class PreprocessingCSV:
         self.df.to_csv(self.clean_csv_path, index=False)
         print(f"Preprocessed CSV saved to {self.clean_csv_path}.")
 
+        # Reload the cleaned data for further processing
+        self.df = pd.read_csv(self.clean_csv_path)
+
     def split_by_patient_id(self):
         # Split the dataset by patient_id
         train_csv_path = os.path.join(self.base_dir, 'Thesis_Hafeez/Dataset/split_csv/train_split.csv')

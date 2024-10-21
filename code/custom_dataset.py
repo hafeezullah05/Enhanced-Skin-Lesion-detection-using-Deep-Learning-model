@@ -24,18 +24,26 @@ class CustomMelanomaDataset(Dataset):
         self.sex_encoder = LabelEncoder().fit(self.metadata['sex'])
         self.site_encoder = LabelEncoder().fit(self.metadata['anatom_site_general_challenge'])
 
-        # Separate malignant and benign samples for dynamic augmentation
-        if not is_test:
-            self.malignant_samples = self.metadata[self.metadata['benign_malignant'] == 'malignant']
-            self.benign_samples = self.metadata[self.metadata['benign_malignant'] == 'benign']
-            
     def __len__(self):
         return len(self.metadata)
 
     def __getitem__(self, idx):
         img_name = self.metadata.iloc[idx, 0]  # image_name
         img_path = os.path.join(self.image_dir, img_name)
-        image = Image.open(img_path).convert('RGB')
+
+        try:
+            image = Image.open(img_path).convert('RGB')
+        except Exception as e:
+            print(f"Error loading image {img_name}: {e}")
+            raise e
+
+        # Ensure resizing is applied consistently to avoid size mismatch
+        try:
+            resize_transform = transforms.Resize((224, 224))
+            image = resize_transform(image)
+        except Exception as e:
+            print(f"Error resizing image {img_name}: {e}")
+            raise e
 
         # Load metadata
         sex = self.metadata.iloc[idx, 2]
@@ -44,8 +52,12 @@ class CustomMelanomaDataset(Dataset):
         benign_malignant = self.metadata.iloc[idx, 5]
 
         # Encode categorical metadata
-        sex_encoded = self.sex_encoder.transform([sex])[0]
-        site_encoded = self.site_encoder.transform([site])[0]
+        try:
+            sex_encoded = self.sex_encoder.transform([sex])[0]
+            site_encoded = self.site_encoder.transform([site])[0]
+        except Exception as e:
+            print(f"Error encoding metadata for image {img_name}: {e}")
+            raise e
 
         metadata = {
             'sex': sex_encoded,
@@ -69,9 +81,17 @@ class CustomMelanomaDataset(Dataset):
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
-            image = augment_transform(image)
+            try:
+                image = augment_transform(image)
+            except Exception as e:
+                print(f"Error applying augmentations to image {img_name}: {e}")
+                raise e
         else:
             if self.transform:
-                image = self.transform(image)
+                try:
+                    image = self.transform(image)
+                except Exception as e:
+                    print(f"Error applying transform to image {img_name}: {e}")
+                    raise e
 
         return image, metadata_tensor, target
