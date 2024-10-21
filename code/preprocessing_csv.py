@@ -18,11 +18,11 @@ class PreprocessingCSV:
 
         # Print unique values to identify anomalies
         unique_values = self.df['anatom_site_general_challenge'].unique()
-        print("Unique values in 'anatom_site_general_challenge':", unique_values)
+        print("\n \n Unique values in 'anatom_site_general_challenge':", unique_values)
 
         # Check for rows that may contain 'unknown'
         unknown_variations = self.df[self.df['anatom_site_general_challenge'].str.contains('unknown', case=False, na=False)]
-        print("Rows with variations of 'unknown':\n", unknown_variations)
+        print("\n \n Rows with variations of 'unknown':\n", unknown_variations)
 
         # Replace common variations with 'unknown'
         self.df['anatom_site_general_challenge'] = self.df['anatom_site_general_challenge'].replace({
@@ -33,25 +33,25 @@ class PreprocessingCSV:
 
         # Verify unique values after cleanup
         unique_values = self.df['anatom_site_general_challenge'].unique()
-        print("Unique values in 'anatom_site_general_challenge' after cleanup:", unique_values)
+        print("\n \n Unique values in 'anatom_site_general_challenge' after cleanup:", unique_values)
 
     def check_for_anomalies(self):
         # Check for NaN values
         nan_values = self.df.isna().sum()
-        print("NaN values in each column:\n", nan_values)
+        print("\n \n NaN values in each column:\n", nan_values)
 
         # Check for infinity values
         infinity_values = self.df.replace([np.inf, -np.inf], np.nan).isna().sum() - self.df.isna().sum()
-        print("Infinity values in each column:\n", infinity_values)
+        print("\n\n Infinity values in each column:\n", infinity_values)
 
         # Check for 'unknown' values
         unknown_values = (self.df['anatom_site_general_challenge'] == 'unknown').sum()
-        print("Number of 'unknown' values in 'anatom_site_general_challenge':", unknown_values)
+        print("\n \n Number of 'unknown' values in 'anatom_site_general_challenge':", unknown_values)
 
         # Check for unusually large values
         columns_for_max = [col for col in self.df.columns if col != 'diagnosis']
         max_values = self.df[columns_for_max].max(numeric_only=True)
-        print("Maximum values in each column (excluding 'diagnosis'):\n", max_values)
+        print("\n \nMaximum values in each column (excluding 'diagnosis'):\n", max_values)
 
     def clean_data(self):
         # Clean the DataFrame
@@ -67,7 +67,7 @@ class PreprocessingCSV:
     def save_clean_data(self):
         # Save the cleaned DataFrame to a new CSV
         self.df.to_csv(self.clean_csv_path, index=False)
-        print(f"Preprocessed CSV saved to {self.clean_csv_path}.")
+        print(f"\n \n Preprocessed CSV saved to {self.clean_csv_path}.")
 
         # Reload the cleaned data for further processing
         self.df = pd.read_csv(self.clean_csv_path)
@@ -90,7 +90,7 @@ class PreprocessingCSV:
         self.write_csv(train_df, train_csv_path)
         self.write_csv(test_df, test_csv_path)
 
-        print(f"Train and test CSV files written to split_csv.")
+        print(f"\n \n Train and test CSV files written to split_csv.")
 
     def write_csv(self, dataframe, path):
         # Write the DataFrame to CSV
@@ -102,21 +102,21 @@ class PreprocessingCSV:
 
         # Check for NaN values
         nan_values = df_cleaned.isna().sum()
-        print("NaN values in each column:\n", nan_values)
+        print("\n \n NaN values in each column:\n", nan_values)
 
         # Check for infinity values
         infinity_values = df_cleaned.replace([np.inf, -np.inf], np.nan).isna().sum() - df_cleaned.isna().sum()
-        print("Infinity values in each column:\n", infinity_values)
+        print("\n \n Infinity values in each column:\n", infinity_values)
 
         # Check for 'unknown' values
         unknown_values = (df_cleaned['anatom_site_general_challenge'] == 'unknown').sum()
-        print("\nNumber of 'unknown' values in 'anatom_site_general_challenge':", unknown_values)
+        print("\n \n Number of 'unknown' values in 'anatom_site_general_challenge':", unknown_values)
 
         # Print unique values
         unique_values = df_cleaned['anatom_site_general_challenge'].unique()
-        print("\nUnique values in 'anatom_site_general_challenge':", unique_values)
+        print("\n \n Unique values in 'anatom_site_general_challenge':", unique_values)
 
         # Check for unusually large values
         columns_for_max = [col for col in df_cleaned.columns if col != 'diagnosis']
         max_values = df_cleaned[columns_for_max].max(numeric_only=True)
-        print("\nMaximum values in each column (excluding 'diagnosis'):\n", max_values)
+        print("\n \n Maximum values in each column (excluding 'diagnosis'):\n", max_values)
