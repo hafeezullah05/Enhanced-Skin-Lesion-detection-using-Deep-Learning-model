@@ -167,8 +167,8 @@ def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossF
         print(f"Test Average Precision Score: {average_precision:.6f}")
         print()
 
-        # Step the scheduler after every epoch
-        scheduler.step()
+        # Step the scheduler after every epoch using average training loss
+        scheduler.step(avg_train_loss)
 
     endTime = time.time()
     print(f"[INFO] Total time taken to train the model: {np.round(endTime - startTime)} seconds")
