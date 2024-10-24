@@ -72,25 +72,51 @@ class PreprocessingCSV:
         # Reload the cleaned data for further processing
         self.df = pd.read_csv(self.clean_csv_path)
 
-    def split_by_patient_id(self):
-        # Split the dataset by patient_id
-        train_csv_path = os.path.join(self.base_dir, 'Thesis_Hafeez/Dataset/split_csv/train_split.csv')
-        test_csv_path = os.path.join(self.base_dir, 'Thesis_Hafeez/Dataset/split_csv/test_split.csv')
+    def split_by_patient_id(df, base_dir):
+        # Define train and test CSV paths
+        train_csv_path = os.path.join(base_dir, 'Thesis_Hafeez/Dataset/split_csv/train_split.csv')
+        test_csv_path = os.path.join(base_dir, 'Thesis_Hafeez/Dataset/split_csv/test_split.csv')
 
-        # Group by patient_id
-        grouped = self.df.groupby('patient_id')
-        unique_patient_ids = self.df['patient_id'].unique()
-        
+       # Check if DataFrame is empty
+        if df.empty:
+            print("Warning: Input DataFrame is empty. Please provide a valid DataFrame.")
+            return
+    
+         # Check if 'patient_id' column exists
+        if 'patient_id' not in df.columns:
+            print("Warning: 'patient_id' column is missing from the DataFrame.")
+            return
+
+        # Split the dataset by patient_id
+        unique_patient_ids = df['patient_id'].unique()
+
+        # Check if there are enough unique patient IDs to split
+        if len(unique_patient_ids) < 2:
+            print("Warning: Not enough unique patient IDs to split the dataset. At least two unique IDs are required.")
+            return
+
         # Split unique patient ids into train and test sets
         train_patient_ids, test_patient_ids = train_test_split(unique_patient_ids, test_size=0.25, random_state=42)
 
-        train_df = self.df[self.df['patient_id'].isin(train_patient_ids)]
-        test_df = self.df[self.df['patient_id'].isin(test_patient_ids)]
+        # Ensure train and test DataFrames are not empty
+        train_df = df[df['patient_id'].isin(train_patient_ids)]
+        test_df = df[df['patient_id'].isin(test_patient_ids)]
 
-        self.write_csv(train_df, train_csv_path)
-        self.write_csv(test_df, test_csv_path)
+        if train_df.empty or test_df.empty:
+            print("Warning: The resulting train or test DataFrame is empty. Please check the dataset for consistency.")
+            return
 
-        print(f"\n \n Train and test CSV files written to split_csv.")
+        # Create or empty the CSV file if it exists
+        if os.path.exists(train_csv_path):
+            open(train_csv_path, 'w').close()  # Empty the file if it exists
+        if os.path.exists(test_csv_path):
+            open(test_csv_path, 'w').close()  # Empty the file if it exists
+
+        # Write train and test DataFrames to CSV
+        train_df.to_csv(train_csv_path, index=False)
+        test_df.to_csv(test_csv_path, index=False)
+
+        print("\nTrain and test CSV files have been written to 'split_csv'.")
 
     def write_csv(self, dataframe, path):
         # Write the DataFrame to CSV
