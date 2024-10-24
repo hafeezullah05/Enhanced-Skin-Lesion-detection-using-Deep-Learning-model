@@ -73,10 +73,13 @@ class TrainMalignantAugmentor:
         augmented_metadata_df = pd.DataFrame(augmented_metadata)
         self.data = pd.concat([self.data, augmented_metadata_df], ignore_index=True)
 
+        print("Image augmentation complete.")
+
     def save_updated_metadata(self):
         """Save the updated metadata to the original CSV file."""
         self.data.to_csv(self.csv_path, index=False)
         print(f"Updated metadata saved to {self.csv_path}")
+        print("Process finished successfully.")
 
 
 class TestMalignantAugmentor:
@@ -148,10 +151,13 @@ class TestMalignantAugmentor:
         augmented_metadata_df = pd.DataFrame(augmented_metadata)
         self.data = pd.concat([self.data, augmented_metadata_df], ignore_index=True)
 
+        print("Image augmentation complete.")
+
     def save_updated_metadata(self):
         """Save the updated metadata to the original CSV file."""
         self.data.to_csv(self.csv_path, index=False)
         print(f"Updated metadata saved to {self.csv_path}")
+        print("Process finished successfully.")
 
 
 if __name__ == "__main__":
