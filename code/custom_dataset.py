@@ -71,6 +71,20 @@ class CustomMelanomaDataset(Dataset):
         # Define target
         target = torch.tensor(1 if benign_malignant == 'malignant' else 0, dtype=torch.float)
         
+        # Apply transformations
+        if self.transform:
+            try:
+                image = self.transform(image)
+            except Exception as e:
+                print(f"Error applying transform to image {img_name}: {e}")
+                raise e
+
+        return image, metadata_tensor, target
+
+
+#
+""""
+
         # Apply augmentations dynamically for malignant samples during training
         if not self.is_test and benign_malignant == 'malignant':
             augment_transform = transforms.Compose([
@@ -80,18 +94,4 @@ class CustomMelanomaDataset(Dataset):
                 transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.1),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            ])
-            try:
-                image = augment_transform(image)
-            except Exception as e:
-                print(f"Error applying augmentations to image {img_name}: {e}")
-                raise e
-        else:
-            if self.transform:
-                try:
-                    image = self.transform(image)
-                except Exception as e:
-                    print(f"Error applying transform to image {img_name}: {e}")
-                    raise e
-
-        return image, metadata_tensor, target
+"""
