@@ -36,7 +36,7 @@ class TrainMalignantAugmentor:
         for i in range(1, self.augmentations_per_image + 1):
             augmented_image = self.augment_transform(original_image)
             augmented_image_name = f"{image_name_prefix}_aug_{i}"
-            augmented_image_path = os.path.join(self.image_dir, f"{augmented_image_name}.jpg")
+            augmented_image_path = os.path.join(self.image_dir, augmented_image_name)
 
             # Save augmented image
             transforms.ToPILImage()(augmented_image).save(augmented_image_path)
@@ -60,7 +60,7 @@ class TrainMalignantAugmentor:
 
             # Only augment malignant cases
             if benign_malignant == 'malignant':
-                image_path = os.path.join(self.image_dir, f"{image_name}.jpg")
+                image_path = os.path.join(self.image_dir, image_name)
                 augmented_image_names = self.augment_image(image_path, image_name)
 
                 # Append metadata for augmented images
@@ -114,7 +114,7 @@ class TestMalignantAugmentor:
         for i in range(1, self.augmentations_per_image + 1):
             augmented_image = self.augment_transform(original_image)
             augmented_image_name = f"{image_name_prefix}_aug_{i}"
-            augmented_image_path = os.path.join(self.image_dir, f"{augmented_image_name}.jpg")
+            augmented_image_path = os.path.join(self.image_dir, augmented_image_name)
 
             # Save augmented image
             transforms.ToPILImage()(augmented_image).save(augmented_image_path)
@@ -138,7 +138,7 @@ class TestMalignantAugmentor:
 
             # Only augment malignant cases
             if benign_malignant == 'malignant':
-                image_path = os.path.join(self.image_dir, f"{image_name}.jpg")
+                image_path = os.path.join(self.image_dir, image_name)
                 augmented_image_names = self.augment_image(image_path, image_name)
 
                 # Append metadata for augmented images

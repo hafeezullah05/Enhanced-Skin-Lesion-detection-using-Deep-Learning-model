@@ -2,6 +2,7 @@ import time
 import numpy as np
 from tqdm import tqdm
 import torch
+import matplotlib.pyplot as plt
 
 # Import necessary metric functions from sklearn
 from sklearn.metrics import precision_score as skl_precision_score
@@ -46,6 +47,14 @@ def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossF
         "test_precision_recall_curve": [],
         "test_average_precision": []
     }
+
+    # Calculate weights for each class
+    malignant_count = len(train_loader.dataset.metadata[train_loader.dataset.metadata['benign_malignant'] == 'malignant'])
+    benign_count = len(train_loader.dataset.metadata[train_loader.dataset.metadata['benign_malignant'] == 'benign'])
+    total_count = malignant_count + benign_count
+    weight_benign = total_count / (2 * benign_count)
+    weight_malignant = total_count / (2 * malignant_count)
+    weights = [weight_benign, weight_malignant]
 
     startTime = time.time()
     
@@ -123,11 +132,11 @@ def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossF
         all_test_targets = np.array(all_test_targets)
         all_test_probs = np.array(all_test_probs)
 
-        # Calculate metrics for test set
+        # Calculate metrics for test set using class weights
         test_acc = skl_accuracy_score(all_test_targets, all_test_preds)
-        test_precision = skl_precision_score(all_test_targets, all_test_preds, zero_division=0)
-        test_recall = skl_recall_score(all_test_targets, all_test_preds, zero_division=0)
-        test_f1 = skl_f1_score(all_test_targets, all_test_preds, zero_division=0)
+        test_precision = skl_precision_score(all_test_targets, all_test_preds, zero_division=0, sample_weight=[weights[int(target)] for target in all_test_targets])
+        test_recall = skl_recall_score(all_test_targets, all_test_preds, zero_division=0, sample_weight=[weights[int(target)] for target in all_test_targets])
+        test_f1 = skl_f1_score(all_test_targets, all_test_preds, zero_division=0, sample_weight=[weights[int(target)] for target in all_test_targets])
         test_roc_auc = roc_auc_score(all_test_targets, all_test_probs)
 
         # Compute Precision-Recall Curve and Average Precision Score
