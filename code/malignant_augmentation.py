@@ -2,7 +2,6 @@ import os
 import pandas as pd
 from PIL import Image
 from torchvision import transforms
-import random
 
 class TrainMalignantAugmentor:
     def __init__(self, csv_path, image_dir, augmentations_per_image=15):
@@ -61,6 +60,12 @@ class TrainMalignantAugmentor:
             # Only augment malignant cases
             if benign_malignant == 'malignant':
                 image_path = os.path.join(self.image_dir, image_name)
+
+                # Check if the file exists
+                if not os.path.exists(image_path):
+                    print(f"Image not found: {image_path}")
+                    continue
+
                 augmented_image_names = self.augment_image(image_path, image_name)
 
                 # Append metadata for augmented images
@@ -139,6 +144,12 @@ class TestMalignantAugmentor:
             # Only augment malignant cases
             if benign_malignant == 'malignant':
                 image_path = os.path.join(self.image_dir, image_name)
+
+                # Check if the file exists
+                if not os.path.exists(image_path):
+                    print(f"Image not found: {image_path}")
+                    continue
+
                 augmented_image_names = self.augment_image(image_path, image_name)
 
                 # Append metadata for augmented images
@@ -161,7 +172,6 @@ class TestMalignantAugmentor:
 
 
 if __name__ == "__main__":
-   
     # Define paths
     BASE_DIR = os.path.join(os.path.expanduser('~'), 'Desktop')
     IMAGE_DIR = os.path.join(BASE_DIR, 'Thesis_Hafeez', 'Dataset', 'Train_JPEG', 'JPEG')
