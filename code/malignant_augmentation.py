@@ -1,3 +1,8 @@
+import os
+import pandas as pd
+from PIL import Image
+from torchvision import transforms
+
 class TrainMalignantAugmentor:
     def __init__(self, csv_path, image_dir, augmentations_per_image=15):
         self.csv_path = csv_path
@@ -32,8 +37,8 @@ class TrainMalignantAugmentor:
             augmented_image_name = f"{image_name_prefix}_aug_{i}"
             augmented_image_path = os.path.join(self.image_dir, augmented_image_name)
 
-            # Save augmented image (specify format explicitly)
-            transforms.ToPILImage()(augmented_image).save(augmented_image_path, format='JPEG')
+            # Save augmented image
+            transforms.ToPILImage()(augmented_image).save(augmented_image_path)
 
             # Create metadata entry for the augmented image
             augmented_entries.append(augmented_image_name)
@@ -116,8 +121,8 @@ class TestMalignantAugmentor:
             augmented_image_name = f"{image_name_prefix}_aug_{i}"
             augmented_image_path = os.path.join(self.image_dir, augmented_image_name)
 
-            # Save augmented image (specify format explicitly)
-            transforms.ToPILImage()(augmented_image).save(augmented_image_path, format='JPEG')
+            # Save augmented image
+            transforms.ToPILImage()(augmented_image).save(augmented_image_path)
 
             # Create metadata entry for the augmented image
             augmented_entries.append(augmented_image_name)
