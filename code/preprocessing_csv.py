@@ -70,7 +70,7 @@ class PreprocessingCSV:
 
         # Save the cleaned DataFrame to a new CSV
         self.df.to_csv(self.clean_csv_path, index=False)
-        print(f"\n \n Preprocessed CSV saved to {self.clean_csv_path}.")
+        print(f"\n \n Preprocessed CSV saved to {self.clean_csv_path}")
 
         # Reload the cleaned data for further processing
         self.df = pd.read_csv(self.clean_csv_path)
@@ -120,7 +120,7 @@ class PreprocessingCSV:
         train_df.to_csv(train_csv_path, index=False)
         test_df.to_csv(test_csv_path, index=False)
 
-        print("\nTrain and test CSV files have been written to 'split_csv'.")
+        print("\nTrain and test CSV files have been written to 'split_csv'")
 
     def verify_preprocessed_data(self):
         # Re-load the cleaned CSV
