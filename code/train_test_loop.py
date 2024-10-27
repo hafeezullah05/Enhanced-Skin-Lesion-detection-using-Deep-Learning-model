@@ -3,6 +3,8 @@ import numpy as np
 from tqdm import tqdm
 import torch
 import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
 # Import necessary metric functions from sklearn
 from sklearn.metrics import precision_score as skl_precision_score
@@ -30,7 +32,7 @@ def f1_score(preds, labels):
     return skl_f1_score(labels.cpu().detach().numpy(), preds.cpu().detach().numpy(), zero_division=0)
 
 # Training and testing function
-def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossFunc, DEVICE, NUM_EPOCHS):
+def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossFunc, DEVICE, NUM_EPOCHS, early_stopping_patience=None):
     H = {
         "train_loss": [],
         "test_loss": [],
@@ -45,7 +47,10 @@ def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossF
         "train_roc_auc": [],
         "test_roc_auc": [],
         "test_precision_recall_curve": [],
-        "test_average_precision": []
+        "test_average_precision": [],
+        "correct_confidences": [],
+        "incorrect_confidences": [],
+        "confusion_matrices": []
     }
 
     # Calculate weights for each class
@@ -57,8 +62,15 @@ def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossF
     weights = [weight_benign, weight_malignant]
 
     startTime = time.time()
+    best_loss = float('inf')
+    epochs_no_improve = 0
+    early_stop = False
     
     for epoch in range(NUM_EPOCHS):
+        if early_stop:
+            print("Early stopping triggered. Stopping training.")
+            break
+
         # Print epoch information
         print(f"\nEpoch {epoch + 1}/{NUM_EPOCHS} running...")
         
@@ -115,13 +127,21 @@ def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossF
                     loss = lossFunc(outputs.squeeze(), targets)
                     running_test_loss += loss.item() * images.size(0)
                     
-                    preds = torch.sigmoid(outputs).round()  # Convert logits to binary predictions (0 or 1)
                     probs = torch.sigmoid(outputs)  # Probabilities for AUC calculation
+                    preds = probs.round()  # Convert probabilities to binary predictions (0 or 1)
                     
                     # Collect predictions and true targets
                     all_test_preds.extend(preds.cpu().detach().numpy())
                     all_test_targets.extend(targets.cpu().detach().numpy())
                     all_test_probs.extend(probs.cpu().detach().numpy())
+
+                    # Analyze model confidence
+                    for prob, pred, target in zip(probs, preds, targets):
+                        confidence = prob.item()
+                        if pred == target:
+                            H["correct_confidences"].append(confidence)
+                        else:
+                            H["incorrect_confidences"].append(confidence)
                     
                     pbar.update(1)  # Update progress bar
         
@@ -159,6 +179,10 @@ def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossF
         H["test_precision_recall_curve"].append((precision, recall))
         H["test_average_precision"].append(average_precision)
         
+        # Compute confusion matrix and store it
+        cm = confusion_matrix(all_test_targets, all_test_preds)
+        H["confusion_matrices"].append(cm)
+        
         # Print the results for this epoch
         print(f"[INFO] EPOCH: {epoch + 1}/{NUM_EPOCHS}")
         print(f"Train loss: {avg_train_loss:.6f}")
@@ -175,6 +199,16 @@ def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossF
         print(f"Test ROC AUC: {test_roc_auc:.6f}")
         print(f"Test Average Precision Score: {average_precision:.6f}")
         print()
+
+        # Early stopping check
+        if early_stopping_patience is not None:
+            if avg_test_loss < best_loss:
+                best_loss = avg_test_loss
+                epochs_no_improve = 0
+            else:
+                epochs_no_improve += 1
+                if epochs_no_improve >= early_stopping_patience:
+                    early_stop = True
 
         # Step the scheduler after every epoch using average training loss
         scheduler.step(avg_train_loss)
