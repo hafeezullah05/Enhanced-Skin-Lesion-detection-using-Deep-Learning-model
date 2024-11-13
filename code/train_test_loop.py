@@ -34,7 +34,7 @@ def f1_score(preds, labels):
     return skl_f1_score(labels.cpu().detach().numpy(), preds.cpu().detach().numpy(), zero_division=0)
 
 # Training and testing function
-def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossFunc, DEVICE, NUM_EPOCHS, Metrics_PATH, early_stopping_patience=None):
+def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossFunc, DEVICE, NUM_EPOCHS, Metrics_PATH, early_stopping_patience):
     H = {
         "train_loss": [],
         "test_loss": [],
@@ -85,6 +85,7 @@ def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossF
         with tqdm(total=len(train_loader), desc='Training', unit='batch') as pbar:
             for images, metadata, targets in train_loader:
                 images, metadata, targets = images.to(DEVICE), metadata.to(DEVICE), targets.to(DEVICE)
+    
                 
                 optimizer.zero_grad()
                 outputs = model(images, metadata)
@@ -217,17 +218,5 @@ def train_and_test(model, train_loader, test_loader, optimizer, scheduler, lossF
 
     endTime = time.time()
     print(f"[INFO] Total time taken to train the model: {np.round(endTime - startTime)} seconds")
-    
-    
-    # Create the directory if it doesn't exist
-    if not os.path.exists(Metrics_PATH):
-        os.makedirs(Metrics_PATH)
-
-    # Save the metrics dictionary (H) after training completes
-    metrics_path = os.path.join(Metrics_PATH, 'metrics.pkl')
-    with open(metrics_path, 'wb') as f:
-        pickle.dump(H, f)
-
-    print(f"Metrics saved to {metrics_path}")
 
     return H

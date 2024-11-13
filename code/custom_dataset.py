@@ -81,17 +81,3 @@ class CustomMelanomaDataset(Dataset):
 
         return image, metadata_tensor, target
 
-
-################################
-""""
-
-        # Apply augmentations dynamically for malignant samples during training
-        if not self.is_test and benign_malignant == 'malignant':
-            augment_transform = transforms.Compose([
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomVerticalFlip(),
-                transforms.RandomRotation(30),
-                transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.1),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-"""
